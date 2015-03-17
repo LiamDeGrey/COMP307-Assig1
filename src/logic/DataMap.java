@@ -6,26 +6,24 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class Data {
-	private HashMap<String, double[]> flowers;
+public class DataMap extends HashMap<String, double[]> {
 
-	public Data(File trainingFile) {
-		flowers = new HashMap<String, double[]>();
-
+	public DataMap(File file) {
 		try {
-			populateMap(trainingFile);
+			populateMap(file);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("\nThere was an issue reading your file");
 		}
 	}
 
-	private void populateMap(File trainingFile) throws IOException {
-		final FileReader readData = new FileReader(trainingFile);
+	private void populateMap(File file) throws IOException {
+		final FileReader readData = new FileReader(file);
 		final BufferedReader reader = new BufferedReader(readData);
 
 		String line;
 		String[] split;
+		String name;
 		while (!(line = reader.readLine()).equals(null)
 				&& !line.isEmpty()) {
 			split = line.split("\\s+");
@@ -33,10 +31,17 @@ public class Data {
 				split = line.split(",");
 			}
 
-			flowers.put(split[4], new double[]{parseDouble(split[0]), parseDouble(split[1]), parseDouble(split[2]), parseDouble(split[3])});
-			System.out.println(split[4]);
+			name = (split.length > 4)? split[4] : "UNKNOWN";
+			put(name, new double[]{parseDouble(split[0]), parseDouble(split[1]), parseDouble(split[2]), parseDouble(split[3])});
 		}
 		reader.close();
+		printMap();
+	}
+
+	private void printMap() {
+		for (String key : keySet()) {
+			System.out.println(key);
+		}
 	}
 
 	private double parseDouble(String str) {
