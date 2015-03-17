@@ -3,9 +3,12 @@ package logic;
 
 public class DataProcessor {
 	private static final int NUMBER_FLOWER_TYPES = 3;
+	private static final int K = 5;
+
 	private static final int SETOSA = 0;
 	private static final int VERSICOLOR = 1;
 	private static final int VIRGINICA = 2;
+
 
 	private DataMap trainingData;
 	private DataMap testData;
@@ -25,7 +28,7 @@ public class DataProcessor {
 
 
 		for (FlowerDataPair<String, double[]> testFlower : testData) {
-			closestFlowers = new FlowerDistancePair[5];
+			closestFlowers = new FlowerDistancePair[K];
 			for (FlowerDataPair<String, double[]> trainingFlower : trainingData) {
 				currentDistance = testFlower.getDistanceTo(trainingFlower);
 				for (int i = 0; i < closestFlowers.length; i++) {
