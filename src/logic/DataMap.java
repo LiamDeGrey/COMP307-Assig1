@@ -4,9 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
 
-public class DataMap extends HashMap<String, double[]> {
+public class DataMap extends ArrayList<FlowerDataPair<String, double[]>> {
 
 	public DataMap(File file) {
 		try {
@@ -32,16 +32,9 @@ public class DataMap extends HashMap<String, double[]> {
 			}
 
 			name = (split.length > 4)? split[4] : "UNKNOWN";
-			put(name, new double[]{parseDouble(split[0]), parseDouble(split[1]), parseDouble(split[2]), parseDouble(split[3])});
+			add(new FlowerDataPair(name, new double[]{parseDouble(split[0]), parseDouble(split[1]), parseDouble(split[2]), parseDouble(split[3])}));
 		}
 		reader.close();
-		printMap();
-	}
-
-	private void printMap() {
-		for (String key : keySet()) {
-			System.out.println(key);
-		}
 	}
 
 	private double parseDouble(String str) {
