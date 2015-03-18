@@ -1,7 +1,11 @@
 package logic;
 
+import java.util.ArrayList;
+
 
 public class DataProcessor {
+	public static final int COUNT = 0;
+	public static final int TOTAL = 1;
 	private static final int NUMBER_FLOWER_TYPES = 3;
 	private static final int K = 5;
 
@@ -9,16 +13,29 @@ public class DataProcessor {
 	private static final int VERSICOLOR = 1;
 	private static final int VIRGINICA = 2;
 
+	private static ArrayList<double[]> individualRanges = new ArrayList<double[]>();
 
 	private DataMap trainingData;
 	private DataMap testData;
 
-	private double range = 10.0;
-
 	public DataProcessor(DataMap trainingData, DataMap testData) {
 		this.trainingData = trainingData;
 		this.testData = testData;
+		getInitialRanges();
 		classifyIris();
+	}
+
+	private void getInitialRanges() {
+		for (FlowerDataPair trainingFlower : trainingData) {
+			for (int i = 0; i < trainingFlower.getValues().length; i++) {
+				if (individualRanges.size() <= i) {
+					individualRanges.add(new double[] {1, trainingFlower.getValues()[i]});
+				} else {
+					individualRanges.get(i)[COUNT] += 1;
+					individualRanges.get(i)[TOTAL] += trainingFlower.getValues()[i];
+				}
+			}
+		}
 	}
 
 	private void classifyIris() {
@@ -26,12 +43,15 @@ public class DataProcessor {
 		String probableFlower;
 		FlowerDistancePair<String, Double>[] closestFlowers;
 
-
+		//Iterate through all test flowers
 		for (FlowerDataPair<String, double[]> testFlower : testData) {
 			closestFlowers = new FlowerDistancePair[K];
+
+			//Iterate through all training flowers for each test flower
 			for (FlowerDataPair<String, double[]> trainingFlower : trainingData) {
 				currentDistance = testFlower.getDistanceTo(trainingFlower);
 				for (int i = 0; i < closestFlowers.length; i++) {
+					//find the closest flowers and add them to our closestFlowers array
 					if (closestFlowers[i] == null) {
 						closestFlowers[i] = new FlowerDistancePair<String, Double>(trainingFlower.getFlower(), currentDistance);
 						closestFlowers = reorderFlowers(closestFlowers);
@@ -45,8 +65,20 @@ public class DataProcessor {
 			}
 			probableFlower = getMostLikelyFlower(closestFlowers);
 			trainingData.add(new FlowerDataPair<String, double[]>(probableFlower, testFlower.getValues()));
+			updateIndividualRanges(testFlower.getValues());
 			System.out.println(probableFlower);
 		}
+	}
+
+	private void updateIndividualRanges(double[] newTrainingFlower) {
+		for (int i = 0; i < newTrainingFlower.length; i++) {
+			individualRanges.get(i)[COUNT] += 1;
+			individualRanges.get(i)[TOTAL] += newTrainingFlower[i];
+		}
+	}
+
+	public static ArrayList<double[]> getRanges() {
+		return individualRanges;
 	}
 
 	private String getMostLikelyFlower(FlowerDistancePair<String, Double>[] closestFlowers) {
@@ -103,11 +135,5 @@ public class DataProcessor {
 			closestFlowers[minimumIndex] = temp;
 		}
 		return closestFlowers;
-	}
-
-	private void printAllPossibilities(FlowerDistancePair<String, Double>[] closestFlowers) {
-		for (FlowerDistancePair<String, Double> flowerPair : closestFlowers) {
-			System.out.println(flowerPair.getFlower());
-		}
 	}
 }

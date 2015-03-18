@@ -1,8 +1,8 @@
 package logic;
 
-public class FlowerDataPair<String, Double> {
-	private static final int RANGE = 10;
+import java.util.ArrayList;
 
+public class FlowerDataPair<String, Double> {
 	private String flower;
 	private double[] values;
 
@@ -21,14 +21,15 @@ public class FlowerDataPair<String, Double> {
 
 	public double getDistanceTo(FlowerDataPair comparisonFlower) {
 		double value = 0.0;
+		ArrayList<double[]> individualRanges = DataProcessor.getRanges();
 		for (int i = 0; i < values.length; i++) {
-			value += calculateIndividualSection(values[i], comparisonFlower.getValues()[i]);
+			value += calculateIndividualSection(values[i], comparisonFlower.getValues()[i], (individualRanges.get(i)[DataProcessor.TOTAL] / individualRanges.get(i)[DataProcessor.COUNT]));
 		}
 
 		return Math.sqrt(value);
 	}
 
-	private double calculateIndividualSection(double testFlowerValue, double trainingFlowerValue) {
-		return (Math.pow((testFlowerValue - trainingFlowerValue), 2)) / (Math.pow(RANGE, 2));
+	private double calculateIndividualSection(double testFlowerValue, double trainingFlowerValue, double range) {
+		return (Math.pow((testFlowerValue - trainingFlowerValue), 2)) / (Math.pow(range, 2));
 	}
 }
