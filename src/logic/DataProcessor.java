@@ -7,14 +7,13 @@ public class DataProcessor {
 	public static final int COUNT = 0;
 	public static final int TOTAL = 1;
 	private static final int NUMBER_FLOWER_TYPES = 3;
-	private static final int K = 5;
-
+	private static final int K = 3;
 	private static final int SETOSA = 0;
 	private static final int VERSICOLOR = 1;
 	private static final int VIRGINICA = 2;
 
 	private static ArrayList<double[]> individualRanges = new ArrayList<double[]>();
-
+	private double amountCorrect = 0.0;
 	private DataMap trainingData;
 	private DataMap testData;
 
@@ -64,10 +63,17 @@ public class DataProcessor {
 				}
 			}
 			probableFlower = getMostLikelyFlower(closestFlowers);
+			amountCorrect += (probableFlower.equals(testFlower.getFlower()))? 1 : 0;
 			trainingData.add(new FlowerDataPair<String, double[]>(probableFlower, testFlower.getValues()));
 			updateIndividualRanges(testFlower.getValues());
-			System.out.println(probableFlower);
+			System.out.println("Found : "+probableFlower+", Expected : "+testFlower.getFlower());
 		}
+		printPercentageCorrect();
+	}
+
+	private void printPercentageCorrect() {
+		double percentage = amountCorrect / testData.size();
+		System.out.println("Classification Accuracy = "+percentage);
 	}
 
 	private void updateIndividualRanges(double[] newTrainingFlower) {
