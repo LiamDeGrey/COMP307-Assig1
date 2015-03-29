@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact name="Iris Testing:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Iris_Testing_jar</output-path>
+    <root id="root">
+      <element id="archive" name="Iris Testing.jar">
+        <element id="module-output" name="Iris Testing" />
+      </element>
+    </root>
+  </artifact>
+</component>

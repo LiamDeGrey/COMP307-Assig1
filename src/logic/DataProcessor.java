@@ -4,15 +4,16 @@ import java.util.ArrayList;
 
 
 public class DataProcessor {
-	public static final int COUNT = 0;
-	public static final int TOTAL = 1;
+	public static final int MIN = 0;
+	public static final int MAX = 1;
+	public static final int RANGE = 2;
 	private static final int NUMBER_FLOWER_TYPES = 3;
 	private static final int K = 3;
 	private static final int SETOSA = 0;
 	private static final int VERSICOLOR = 1;
 	private static final int VIRGINICA = 2;
 
-	private static ArrayList<double[]> individualRanges = new ArrayList<double[]>();
+	private static ArrayList<double[]> individualRanges = new ArrayList<>();
 	private double amountCorrect = 0.0;
 	private DataMap trainingData;
 	private DataMap testData;
@@ -26,12 +27,21 @@ public class DataProcessor {
 
 	private void getInitialRanges() {
 		for (FlowerDataPair trainingFlower : trainingData) {
-			for (int i = 0; i < trainingFlower.getValues().length; i++) {
+			double[] values = trainingFlower.getValues();
+			for (int i = 0; i < values.length; i++) {
 				if (individualRanges.size() <= i) {
-					individualRanges.add(new double[] {1, trainingFlower.getValues()[i]});
+					individualRanges.add(i, new double[]{values[i], values[i], 0});
 				} else {
-					individualRanges.get(i)[COUNT] += 1;
-					individualRanges.get(i)[TOTAL] += trainingFlower.getValues()[i];
+					double[] minMaxRange = individualRanges.get(i);
+					if (minMaxRange[MIN] > values[i]) {
+						minMaxRange[MIN] = values[i];
+						minMaxRange[RANGE] = minMaxRange[MAX] - minMaxRange[MIN];
+						individualRanges.add(i, minMaxRange);
+					} else if (minMaxRange[MAX] < values[i]) {
+						minMaxRange[MAX] = values[i];
+						minMaxRange[RANGE] = minMaxRange[MAX] - minMaxRange[MIN];
+						individualRanges.add(i, minMaxRange);
+					}
 				}
 			}
 		}
@@ -52,11 +62,11 @@ public class DataProcessor {
 				for (int i = 0; i < closestFlowers.length; i++) {
 					//find the closest flowers and add them to our closestFlowers array
 					if (closestFlowers[i] == null) {
-						closestFlowers[i] = new FlowerDistancePair<String, Double>(trainingFlower.getFlower(), currentDistance);
+						closestFlowers[i] = new FlowerDistancePair<>(trainingFlower.getFlower(), currentDistance);
 						closestFlowers = reorderFlowers(closestFlowers);
 						break;
 					} else if (closestFlowers[i].getDistance() > currentDistance) {
-						closestFlowers[i] = new FlowerDistancePair<String, Double>(trainingFlower.getFlower(), currentDistance);
+						closestFlowers[i] = new FlowerDistancePair<>(trainingFlower.getFlower(), currentDistance);
 						closestFlowers = reorderFlowers(closestFlowers);
 						break;
 					}
@@ -64,8 +74,6 @@ public class DataProcessor {
 			}
 			probableFlower = getMostLikelyFlower(closestFlowers);
 			amountCorrect += (probableFlower.equals(testFlower.getFlower()))? 1 : 0;
-			trainingData.add(new FlowerDataPair<String, double[]>(probableFlower, testFlower.getValues()));
-			updateIndividualRanges(testFlower.getValues());
 			System.out.println("Found : "+probableFlower+", Expected : "+testFlower.getFlower());
 		}
 		printPercentageCorrect();
@@ -73,14 +81,7 @@ public class DataProcessor {
 
 	private void printPercentageCorrect() {
 		double percentage = amountCorrect / testData.size();
-		System.out.println("Classification Accuracy = "+percentage);
-	}
-
-	private void updateIndividualRanges(double[] newTrainingFlower) {
-		for (int i = 0; i < newTrainingFlower.length; i++) {
-			individualRanges.get(i)[COUNT] += 1;
-			individualRanges.get(i)[TOTAL] += newTrainingFlower[i];
-		}
+		System.out.println("Classification Accuracy = " + percentage);
 	}
 
 	public static ArrayList<double[]> getRanges() {
@@ -90,7 +91,7 @@ public class DataProcessor {
 	private String getMostLikelyFlower(FlowerDistancePair<String, Double>[] closestFlowers) {
 		int[] flowerCount = new int[NUMBER_FLOWER_TYPES];
 		for (FlowerDistancePair<String, Double> flowerPair : closestFlowers) {
-			switch ((String)flowerPair.getFlower()) {
+			switch (flowerPair.getFlower()) {
 			case "Iris-setosa":
 				flowerCount[SETOSA] += 1;
 				break;
@@ -132,7 +133,7 @@ public class DataProcessor {
 		for (int i = 0; i < closestFlowers.length; i++) {
 			minimumIndex = i;
 			for (int j = i; j < closestFlowers.length; j++) {
-				if (closestFlowers[j] != null && closestFlowers[j].getDistance() < closestFlowers[minimumIndex].getDistance()) {
+				if (closestFlowers[j] != null && closestFlowers[j].closerThan(closestFlowers[minimumIndex])) {
 					minimumIndex = j;
 				}
 			}

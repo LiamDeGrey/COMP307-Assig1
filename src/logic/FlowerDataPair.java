@@ -23,7 +23,7 @@ public class FlowerDataPair<String, Double> {
 		double value = 0.0;
 		ArrayList<double[]> individualRanges = DataProcessor.getRanges();
 		for (int i = 0; i < values.length; i++) {
-			value += calculateIndividualSection(values[i], comparisonFlower.getValues()[i], (individualRanges.get(i)[DataProcessor.TOTAL] / individualRanges.get(i)[DataProcessor.COUNT]));
+			value += calculateIndividualSection(values[i], comparisonFlower.getValues()[i], individualRanges.get(i)[DataProcessor.RANGE]);
 		}
 
 		return Math.sqrt(value);
